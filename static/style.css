@@ -1,0 +1,75 @@
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background: #1e1e2f;
+  color: white;
+  padding: 20px;
+  margin: 0;
+}
+
+.ecran {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.cache {
+  display: none;
+}
+
+.boutons {
+  margin: 10px 0;
+}
+
+input, select, button {
+  padding: 10px;
+  margin: 5px;
+  border-radius: 6px;
+  border: none;
+  font-size: 15px;
+}
+
+button {
+  background: #4CAF50;
+  color: white;
+  cursor: pointer;
+}
+
+button:disabled {
+  background: #555;
+  cursor: not-allowed;
+}
+
+#clavier {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 400px;
+  margin: 15px auto;
+}
+
+#clavier button {
+  width: 38px;
+  height: 38px;
+  margin: 2px;
+  padding: 0;
+}
+
+#mot-affiche {
+  letter-spacing: 6px;
+  font-family: monospace;
+}
+
+.message {
+  color: #ffcc00;
+  min-height: 20px;
+}
+
+.role {
+  font-weight: bold;
+  font-size: 16px;
+  margin: 10px 0;
+}
+
+#boutons-vote button {
+  background: #e67e22;
+}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pendu Multijoueur</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="ecran-auth" class="ecran">
+    <h1>Pendu Multijoueur</h1>
+    <input id="champ-identifiant" placeholder="Identifiant" />
+    <input id="champ-mot-de-passe" type="password" placeholder="Mot de passe (6+ caracteres)" />
+    <div class="boutons">
+      <button onclick="inscription()">S'inscrire</button>
+      <button onclick="connexion()">Se connecter</button>
+    </div>
+    <p id="message-auth" class="message"></p>
+  </div>
+
+  <div id="ecran-salle" class="ecran cache">
+    <h2>Bienvenue <span id="nom-joueur"></span></h2>
+    <button onclick="creerSalle()">Creer une salle</button>
+    <div class="boutons">
+      <input id="champ-code-salle" placeholder="Code de salle" />
+      <button onclick="rejoindreSalle()">Rejoindre</button>
+    </div>
+    <p id="message-salle" class="message"></p>
+  </div>
+
+  <div id="ecran-jeu" class="ecran cache">
+    <h2>Salle : <span id="code-salle-affiche"></span></h2>
+    <p>Joueurs (<span id="nombre-joueurs"></span>/6) : <span id="liste-joueurs"></span></p>
+
+    <div id="config-partie">
+      <select id="select-mode">
+        <option value="classique">Classique (coop)</option>
+        <option value="imposteur">Imposteur</option>
+      </select>
+      <select id="select-categorie">
+        <option value="informatique">Informatique</option>
+        <option value="cybersecurite">Cybersecurite</option>
+        <option value="animaux">Animaux</option>
+      </select>
+      <select id="select-difficulte">
+        <option value="facile">Facile</option>
+        <option value="moyen">Moyen</option>
+        <option value="difficile">Difficile</option>
+      </select>
+      <button onclick="demarrerPartie()">Demarrer la partie</button>
+    </div>
+
+    <p id="role-affiche" class="role cache"></p>
+    <p id="tour-actuel" class="message"></p>
+    <h1 id="mot-affiche">_ _ _ _</h1>
+    <p>Erreurs : <span id="compteur-erreurs">0</span>/6</p>
+    <p>Lettres essayees : <span id="lettres-essayees"></span></p>
+    <div id="clavier"></div>
+
+    <div id="zone-vote" class="cache">
+      <h3>Phase de vote : qui est l'imposteur ?</h3>
+      <div id="boutons-vote"></div>
+      <p id="statut-vote" class="message"></p>
+    </div>
+
+    <p id="resultat" class="message"></p>
+  </div>
+
+<script src="app.js"></script>
+</body>
+</html>
