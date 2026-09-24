@@ -1,0 +1,21 @@
+# Blueprint Render : cree le service web et la base PostgreSQL en une seule fois
+# (Render > New > Blueprint > choisir ce depot).
+services:
+  - type: web
+    name: underpendu
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    # Une seule instance obligatoire : les salles de jeu sont gardees en memoire
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: underpendu-db
+          property: connectionString
+
+databases:
+  - name: underpendu-db
+    plan: free
