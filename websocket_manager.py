@@ -19,6 +19,10 @@ MANCHES_MAX = 10
 DUREE_MANCHE_DEFAUT = 180  # secondes (3 minutes) par manche
 DELAI_RECONNEXION = 20  # secondes de grace avant de retirer definitivement un joueur deconnecte
 
+# Avatars autorises (choisis dans le profil) : on refuse toute autre valeur envoyee par le client
+COULEURS_AVATAR = ("c0", "c1", "c2", "c3", "c4", "c5")
+EMOJIS_AVATAR = ("🕵️", "🦊", "🐱", "🐼", "🦉", "🐸", "🤖", "👻", "🐯", "🦄", "🐙", "🎩")
+
 
 @dataclass
 class Joueur:
@@ -27,6 +31,8 @@ class Joueur:
     identifiant: str
     websocket: WebSocket
     deconnecte: bool = False
+    couleur: str | None = None  # avatar choisi dans le profil (sinon couleur selon la place)
+    emoji: str | None = None
 
 
 @dataclass
@@ -143,6 +149,7 @@ class GestionnaireSalles:
             "hote": salle.hote,
             "joueurs": [j.identifiant for j in salle.joueurs],
             "joueurs_deconnectes": [j.identifiant for j in salle.joueurs if j.deconnecte],
+            "avatars": {j.identifiant: {"couleur": j.couleur, "emoji": j.emoji} for j in salle.joueurs},
             "categorie": salle.categorie,
             "difficulte": salle.difficulte,
             "mot_affiche": affichage_mot,

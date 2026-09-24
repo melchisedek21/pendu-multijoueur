@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>UnderPendu — Pendu × Imposteur</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <meta name="theme-color" content="#050b1b">
@@ -18,32 +18,33 @@
 
   <!-- ECRAN AUTHENTIFICATION -->
   <div id="ecran-auth" class="ecran-simple">
+    <div class="selecteur-langue" id="selecteur-langue-auth"></div>
     <div class="accueil-split">
     <div class="vitrine">
-      <h2 class="vitrine-titre">Le pendu ou <span>l'un de vous ment.</span></h2>
-      <p class="vitrine-texte">Devinez le mot a plusieurs... et demasquez l'imposteur qui, lui, ne le connait pas.</p>
+      <h2 class="vitrine-titre"><span data-i18n="vitrine.titre1">Le pendu ou</span> <span class="degrade" data-i18n="vitrine.titre2">l'un de vous ment.</span></h2>
+      <p class="vitrine-texte" data-i18n="vitrine.texte"></p>
       <div class="demo-mot" id="demo-mot" aria-hidden="true"></div>
       <div class="demo-essais" id="demo-essais" aria-hidden="true"></div>
       <ul class="vitrine-atouts">
-        <li>👥 2 a 6 joueurs</li>
-        <li>🕵️ Mode Imposteur</li>
-        <li>💬 Chat en direct</li>
-        <li>📱 Sans installation</li>
+        <li data-i18n="vitrine.joueurs"></li>
+        <li data-i18n="vitrine.imposteur"></li>
+        <li data-i18n="vitrine.chat"></li>
+        <li data-i18n="vitrine.installation"></li>
       </ul>
     </div>
     <div class="carte-auth">
       <img class="logo-auth" src="logo.svg" alt="">
       <h1>UNDER<span>PENDU</span></h1>
-      <p class="sous-titre">Pendu × Imposteur</p>
-      <input id="champ-identifiant" placeholder="Identifiant (3-20 caracteres)" maxlength="20" />
+      <p class="sous-titre" data-i18n="app.sous_titre">Pendu × Imposteur</p>
+      <input id="champ-identifiant" data-i18n-placeholder="auth.placeholder_id" maxlength="20" autocomplete="username" autocapitalize="off" />
       <div class="champ-mdp">
-        <input id="champ-mot-de-passe" type="password" placeholder="Mot de passe (6+ caracteres)" maxlength="72" />
+        <input id="champ-mot-de-passe" type="password" data-i18n-placeholder="auth.placeholder_mdp" maxlength="72" autocomplete="current-password" />
         <button type="button" id="bouton-voir-mdp" class="bouton-oeil" onclick="basculerMotDePasse()"
-                title="Afficher le mot de passe" aria-label="Afficher le mot de passe">👁️</button>
+                data-i18n-title="auth.voir_mdp">👁️</button>
       </div>
       <div class="boutons">
-        <button onclick="inscription()">S'inscrire</button>
-        <button onclick="connexion()">Se connecter</button>
+        <button onclick="inscription()" data-i18n="auth.inscrire">S'inscrire</button>
+        <button onclick="connexion()" data-i18n="auth.connecter">Se connecter</button>
       </div>
       <p id="message-auth" class="message"></p>
     </div>
@@ -52,25 +53,21 @@
 
   <!-- ECRAN SALLE -->
   <div id="ecran-salle" class="ecran-simple cache">
+    <button class="bouton-profil bouton-profil-flottant" onclick="ouvrirProfil()" data-i18n-title="entete.profil">
+      <span class="avatar avatar-mini" data-avatar-moi></span>
+      <span class="bouton-profil-nom" data-nom-moi></span>
+      <span class="bouton-profil-engrenage">⚙️</span>
+    </button>
     <div class="carte-auth">
-      <h2>Bienvenue <span id="nom-joueur"></span></h2>
-      <button class="bouton-large" onclick="creerSalle()">Creer une salle</button>
-      <div class="separateur"><span>ou</span></div>
+      <h2><span data-i18n="salle.bienvenue">Bienvenue</span> <span id="nom-joueur"></span></h2>
+      <button class="bouton-large" onclick="creerSalle()" data-i18n="salle.creer">Creer une salle</button>
+      <div class="separateur"><span data-i18n="salle.ou">ou</span></div>
       <div class="boutons boutons-rejoindre">
-        <input id="champ-code-salle" placeholder="Code de salle" maxlength="5" />
-        <button onclick="rejoindreSalle()">Rejoindre</button>
+        <input id="champ-code-salle" data-i18n-placeholder="salle.code" maxlength="5" autocapitalize="characters" autocomplete="off" />
+        <button onclick="rejoindreSalle()" data-i18n="salle.rejoindre">Rejoindre</button>
       </div>
       <p id="message-salle" class="message"></p>
-      <button class="bouton-secondaire" onclick="ouvrirHistorique()">📜 Mon historique</button>
-    </div>
-  </div>
-
-  <!-- PANNEAU HISTORIQUE -->
-  <div id="panneau-historique" class="ecran-simple cache">
-    <div class="carte-auth carte-historique">
-      <h2>📜 Historique des scores</h2>
-      <div id="liste-historique" class="liste-historique"></div>
-      <button onclick="fermerHistorique()">Retour</button>
+      <button class="bouton-secondaire" onclick="ouvrirProfil()" data-i18n="salle.profil">👤 Mon profil</button>
     </div>
   </div>
 
@@ -79,22 +76,26 @@
 
     <header class="topbar">
       <div class="brand">
-        <button class="brand-bouton" onclick="ouvrirRegles()" title="Comment jouer ?">
+        <button class="brand-bouton" onclick="ouvrirRegles()" data-i18n-title="entete.aide_titre">
           <img class="logo-entete" src="logo.svg" alt="">
           <span class="brand-texte">
             <span class="brand-titre">UNDER<span>PENDU</span></span>
-            <span class="brand-aide">❔ Comment jouer ?</span>
+            <span class="brand-aide" data-i18n="entete.aide">❔ Comment jouer ?</span>
           </span>
         </button>
-        <button class="code-salle-bouton" onclick="copierCodeSalle()" title="Copier le code pour inviter des amis">
-          Salle : <strong id="code-salle-affiche"></strong> 📋
+        <button class="code-salle-bouton" onclick="copierCodeSalle()" data-i18n-title="entete.copier_titre">
+          <span data-i18n="entete.salle">Salle :</span> <strong id="code-salle-affiche"></strong> 📋
         </button>
       </div>
       <div class="game-info">
-        <div class="info-pill">👥 <strong id="nombre-joueurs"></strong>/6 joueurs</div>
-        <div class="info-pill" id="pill-mode">🎮 Classique</div>
-        <div class="info-pill" id="pill-manche">Manche 0/0</div>
-        <button class="icon-btn bouton-danger" onclick="quitterPartie()" title="Quitter">✕</button>
+        <div class="info-pill">👥 <strong id="nombre-joueurs"></strong>/6 <span data-i18n="entete.joueurs">joueurs</span></div>
+        <div class="info-pill" id="pill-mode"></div>
+        <div class="info-pill" id="pill-manche"></div>
+        <button class="bouton-profil" onclick="ouvrirProfil()" data-i18n-title="entete.profil">
+          <span class="avatar avatar-mini" data-avatar-moi></span>
+          <span class="bouton-profil-engrenage">⚙️</span>
+        </button>
+        <button class="icon-btn bouton-danger" onclick="quitterPartie()" data-i18n-title="entete.quitter">✕</button>
       </div>
     </header>
 
@@ -103,7 +104,7 @@
       <!-- COLONNE GAUCHE -->
       <aside class="left-column">
         <section class="card players-card">
-          <div class="section-title"><h2>👥 Joueurs</h2></div>
+          <div class="section-title"><h2 data-i18n="jeu.joueurs">👥 Joueurs</h2></div>
           <div class="players" id="liste-joueurs-visuelle"></div>
         </section>
 
@@ -111,11 +112,11 @@
           <div class="role-heading">
             <span class="role-icon">🕵️</span>
             <div>
-              <span>Ton role</span>
-              <strong class="role-badge" id="badge-role">INNOCENT</strong>
+              <span data-i18n="jeu.ton_role">Ton role</span>
+              <strong class="role-badge" id="badge-role"></strong>
             </div>
           </div>
-          <p class="muted" id="label-mot-role">Le mot :</p>
+          <p class="muted" id="label-mot-role" data-i18n="jeu.le_mot">Le mot :</p>
           <div class="secret-word" id="mot-role"></div>
           <p class="warning" id="avertissement-role"></p>
         </section>
@@ -123,39 +124,39 @@
         <section class="card" id="carte-config">
           <div id="config-partie">
             <select id="select-mode">
-              <option value="classique">Classique (coop)</option>
-              <option value="imposteur">Imposteur</option>
+              <option value="classique" data-i18n="config.classique">Classique (coop)</option>
+              <option value="imposteur" data-i18n="config.imposteur">Imposteur</option>
             </select>
             <select id="select-categorie">
-              <option value="informatique">Informatique</option>
-              <option value="cybersecurite">Cybersecurite</option>
-              <option value="animaux">Animaux</option>
-              <option value="geographie">Geographie</option>
-              <option value="sports">Sports</option>
+              <option value="informatique" data-i18n="categories.informatique">Informatique</option>
+              <option value="cybersecurite" data-i18n="categories.cybersecurite">Cybersecurite</option>
+              <option value="animaux" data-i18n="categories.animaux">Animaux</option>
+              <option value="geographie" data-i18n="categories.geographie">Geographie</option>
+              <option value="sports" data-i18n="categories.sports">Sports</option>
             </select>
             <select id="select-difficulte">
-              <option value="facile">Facile</option>
-              <option value="moyen">Moyen</option>
-              <option value="difficile">Difficile</option>
+              <option value="facile" data-i18n="difficultes.facile">Facile</option>
+              <option value="moyen" data-i18n="difficultes.moyen">Moyen</option>
+              <option value="difficile" data-i18n="difficultes.difficile">Difficile</option>
             </select>
-            <label class="label-champ" for="champ-manches">Nombre de manches</label>
-            <input id="champ-manches" type="number" min="1" max="10" value="1" />
-            <button onclick="demarrerPartie()">Demarrer la partie</button>
+            <label class="label-champ" for="champ-manches" data-i18n="config.nb_manches">Nombre de manches</label>
+            <input id="champ-manches" type="number" min="1" max="10" value="1" inputmode="numeric" />
+            <button onclick="demarrerPartie()" data-i18n="config.demarrer">Demarrer la partie</button>
           </div>
-          <p id="message-attente-hote" class="message cache">En attente que l'hote demarre la partie...</p>
+          <p id="message-attente-hote" class="message cache"></p>
         </section>
       </aside>
 
       <!-- CENTRE : JEU -->
       <section class="card game-card">
         <div class="game-top">
-          <div class="target-label">🎯 Mot a deviner</div>
+          <div class="target-label" data-i18n="jeu.mot_a_deviner">🎯 Mot a deviner</div>
           <div class="lives" id="lives"></div>
         </div>
 
         <div class="minuteur-manche">
           <div class="minuteur-ligne">
-            <span>⏱️ Temps restant : <strong id="temps-restant-affiche">--:--</strong></span>
+            <span><span data-i18n="jeu.temps_restant">⏱️ Temps restant :</span> <strong id="temps-restant-affiche">--:--</strong></span>
             <span id="temps-restant-tour-affiche" class="tour-timer cache"></span>
           </div>
           <div class="barre-temps-fond"><div class="barre-temps-remplissage" id="barre-temps"></div></div>
@@ -178,7 +179,7 @@
           </svg>
 
           <div class="word" id="mot-affiche"></div>
-          <p class="errors">Erreurs : <span id="compteur-erreurs">0</span>/6</p>
+          <p class="errors"><span data-i18n="jeu.erreurs">Erreurs :</span> <span id="compteur-erreurs">0</span>/6</p>
         </div>
 
         <div class="keyboard" id="clavier"></div>
@@ -186,13 +187,13 @@
         <div class="hint">
           <div class="hint-icon">💡</div>
           <div>
-            <small>Info de la manche</small>
-            <p id="texte-indice">Categorie et difficulte s'affichent ici une fois la partie lancee.</p>
+            <small data-i18n="jeu.info_manche">Info de la manche</small>
+            <p id="texte-indice"></p>
           </div>
         </div>
 
         <div id="zone-vote" class="cache">
-          <h3>Phase de vote : qui est l'imposteur ?</h3>
+          <h3 data-i18n="vote.titre">Phase de vote : qui est l'imposteur ?</h3>
           <div id="boutons-vote"></div>
           <p id="statut-vote" class="message"></p>
         </div>
@@ -203,10 +204,10 @@
       <!-- COLONNE DROITE -->
       <aside class="right-column">
         <section class="card chat-card">
-          <div class="chat-header"><h2>💬 Chat</h2></div>
+          <div class="chat-header"><h2 data-i18n="jeu.chat">💬 Chat</h2></div>
           <div class="messages" id="messages-chat"></div>
           <form class="chat-input" id="formulaire-chat">
-            <input id="champ-chat" type="text" placeholder="Ecris un message..." maxlength="300">
+            <input id="champ-chat" type="text" data-i18n-placeholder="jeu.chat_placeholder" maxlength="300" autocomplete="off">
             <button type="submit">➤</button>
           </form>
         </section>
@@ -214,71 +215,169 @@
     </main>
 
     <nav class="bottom-nav">
-      <span class="slogan">Choisis bien tes mots... et tes allies. 🕵️</span>
+      <span class="slogan" data-i18n="jeu.slogan">Choisis bien tes mots... et tes allies. 🕵️</span>
     </nav>
   </div>
 
   <!-- OVERLAY FIN DE MANCHE -->
   <div id="overlay-fin-manche" class="overlay cache">
     <div class="modale">
-      <h2 id="titre-fin-manche">Fin de la manche</h2>
+      <h2 id="titre-fin-manche" data-i18n="fin.titre_manche">Fin de la manche</h2>
       <p id="mot-fin-manche" class="message"></p>
       <div id="classement-manche" class="classement"></div>
-      <button id="bouton-manche-suivante" class="cache" onclick="lancerMancheSuivante()">Manche suivante ▶</button>
-      <p id="attente-hote-manche" class="message cache">En attente que l'hote lance la manche suivante...</p>
+      <button id="bouton-manche-suivante" class="cache" onclick="lancerMancheSuivante()" data-i18n="fin.suivante">Manche suivante ▶</button>
+      <p id="attente-hote-manche" class="message cache" data-i18n="fin.attente_manche"></p>
     </div>
   </div>
 
   <!-- OVERLAY FIN DE MATCH -->
   <div id="overlay-fin-match" class="overlay cache">
     <div class="modale">
-      <h2>🏆 Fin du match !</h2>
+      <h2 data-i18n="fin.titre_match">🏆 Fin du match !</h2>
       <p id="mot-fin-match" class="mot-revele"></p>
       <div id="classement-final" class="classement"></div>
       <div id="boutons-fin-match" class="boutons-fin-match cache">
-        <button onclick="rejouer()">🔁 Rejouer (memes parametres)</button>
-        <button class="bouton-secondaire" onclick="changerParametres()">⚙️ Changer les parametres</button>
+        <button onclick="rejouer()" data-i18n="fin.rejouer">🔁 Rejouer (memes parametres)</button>
+        <button class="bouton-secondaire" onclick="changerParametres()" data-i18n="fin.changer">⚙️ Changer les parametres</button>
       </div>
-      <p id="attente-hote-match" class="message cache">En attente que l'hote relance une partie...</p>
+      <p id="attente-hote-match" class="message cache" data-i18n="fin.attente_match"></p>
     </div>
   </div>
 
-  <!-- OVERLAY REGLES DU JEU (ouvert en cliquant sur le nom du jeu) -->
+  <!-- PANNEAU PROFIL / PARAMETRES (plein ecran sur telephone) -->
+  <div id="overlay-profil" class="overlay overlay-profil cache" onclick="if (event.target === this) fermerProfil()">
+    <div class="panneau-profil" role="dialog" aria-modal="true">
+      <div class="panneau-entete">
+        <div class="onglets" role="tablist">
+          <button class="onglet" role="tab" data-onglet="profil" onclick="afficherOnglet('profil')" data-i18n="profil.onglet_profil">Profil</button>
+          <button class="onglet" role="tab" data-onglet="parametres" onclick="afficherOnglet('parametres')" data-i18n="profil.onglet_parametres">Parametres</button>
+        </div>
+        <button class="bouton-fermer" onclick="fermerProfil()" data-i18n-title="profil.fermer">✕</button>
+      </div>
+
+      <div class="panneau-corps">
+        <!-- Onglet PROFIL -->
+        <div id="vue-profil" class="vue">
+          <div class="profil-carte">
+            <div class="avatar avatar-grand" data-avatar-moi></div>
+            <div class="profil-identite">
+              <h2 data-nom-moi></h2>
+              <span class="rang-badge" id="profil-rang"></span>
+              <p class="profil-depuis" id="profil-depuis"></p>
+            </div>
+          </div>
+          <div class="progression">
+            <div class="progression-barre"><div id="profil-progression"></div></div>
+            <small id="profil-prochain"></small>
+          </div>
+          <div class="stats" id="profil-stats"></div>
+
+          <h3 data-i18n="profil.avatar">Mon avatar</h3>
+          <p class="aide-petite" data-i18n="profil.avatar_aide"></p>
+          <div class="choix-couleurs" id="choix-couleurs"></div>
+          <div class="choix-emojis" id="choix-emojis"></div>
+
+          <h3 data-i18n="profil.succes">Succes</h3>
+          <div class="succes" id="profil-succes"></div>
+
+          <h3 data-i18n="profil.historique">Historique</h3>
+          <div id="liste-historique" class="liste-historique"></div>
+        </div>
+
+        <!-- Onglet PARAMETRES : menu principal -->
+        <div id="vue-parametres" class="vue cache">
+          <div class="groupe-reglages">
+            <button class="ligne-reglage" onclick="ouvrirSousVue('compte')">
+              <span class="ico">👤</span><span data-i18n="param.compte">Compte</span><span class="chevron">›</span>
+            </button>
+          </div>
+          <div class="groupe-reglages">
+            <button class="ligne-reglage" onclick="ouvrirSousVue('langue')">
+              <span class="ico">🌐</span><span data-i18n="param.langue">Langue</span>
+              <span class="valeur" id="valeur-langue"></span><span class="chevron">›</span>
+            </button>
+            <button class="ligne-reglage" onclick="ouvrirSousVue('jeu')">
+              <span class="ico">🎮</span><span data-i18n="param.jeu">Jeu</span><span class="chevron">›</span>
+            </button>
+          </div>
+          <div class="groupe-reglages">
+            <button class="ligne-reglage" onclick="ouvrirSousVue('apropos')">
+              <span class="ico">ℹ️</span><span data-i18n="param.apropos">A propos de UnderPendu</span><span class="chevron">›</span>
+            </button>
+            <button class="ligne-reglage" onclick="ouvrirRegles()">
+              <span class="ico">❔</span><span data-i18n="param.aide">Obtenir de l'aide</span><span class="chevron">›</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Sous-vue COMPTE -->
+        <div id="sous-vue-compte" class="vue cache">
+          <button class="bouton-retour" onclick="ouvrirSousVue(null)">‹ <span data-i18n="param.retour">Retour</span></button>
+          <div class="groupe-reglages">
+            <div class="ligne-info"><span data-i18n="param.identifiant">Identifiant</span><strong data-nom-moi></strong></div>
+          </div>
+          <h3 data-i18n="param.changer_mdp">Changer le mot de passe</h3>
+          <form id="formulaire-mdp" class="formulaire-mdp">
+            <input type="password" id="champ-ancien-mdp" data-i18n-placeholder="param.ancien_mdp" autocomplete="current-password" maxlength="72" />
+            <input type="password" id="champ-nouveau-mdp" data-i18n-placeholder="param.nouveau_mdp" autocomplete="new-password" maxlength="72" />
+            <button type="submit" data-i18n="param.enregistrer">Enregistrer</button>
+            <p id="message-mdp" class="message"></p>
+          </form>
+          <button class="bouton-deconnexion" onclick="deconnexion()" data-i18n="param.deconnexion">Se deconnecter</button>
+        </div>
+
+        <!-- Sous-vue LANGUE -->
+        <div id="sous-vue-langue" class="vue cache">
+          <button class="bouton-retour" onclick="ouvrirSousVue(null)">‹ <span data-i18n="param.retour">Retour</span></button>
+          <div class="groupe-reglages" id="liste-langues"></div>
+          <p class="aide-petite" data-i18n="param.langue_aide"></p>
+        </div>
+
+        <!-- Sous-vue JEU -->
+        <div id="sous-vue-jeu" class="vue cache">
+          <button class="bouton-retour" onclick="ouvrirSousVue(null)">‹ <span data-i18n="param.retour">Retour</span></button>
+          <div class="groupe-reglages">
+            <label class="ligne-reglage ligne-interrupteur">
+              <span class="ico">✨</span>
+              <span class="texte-reglage"><span data-i18n="param.animations">Animations</span><small data-i18n="param.animations_aide"></small></span>
+              <input type="checkbox" id="reglage-animations" class="interrupteur">
+            </label>
+            <label class="ligne-reglage ligne-interrupteur">
+              <span class="ico">📳</span>
+              <span class="texte-reglage"><span data-i18n="param.vibrations">Vibrer quand c'est mon tour</span><small data-i18n="param.vibrations_aide"></small></span>
+              <input type="checkbox" id="reglage-vibrations" class="interrupteur">
+            </label>
+          </div>
+        </div>
+
+        <!-- Sous-vue A PROPOS -->
+        <div id="sous-vue-apropos" class="vue cache">
+          <button class="bouton-retour" onclick="ouvrirSousVue(null)">‹ <span data-i18n="param.retour">Retour</span></button>
+          <div class="apropos">
+            <img src="logo-horizontal.svg" alt="UnderPendu">
+            <p data-i18n="param.apropos_texte"></p>
+            <p class="aide-petite" id="apropos-version"></p>
+            <p class="aide-petite" data-i18n="param.credits"></p>
+            <p class="aide-petite" data-i18n="param.technos"></p>
+            <a class="lien-github" href="https://github.com/melchisedek21/pendu-multijoueur" target="_blank" rel="noopener" data-i18n="param.code_source"></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERLAY REGLES DU JEU (clic sur le nom du jeu, ou "Obtenir de l'aide") -->
   <div id="overlay-regles" class="overlay cache" onclick="if (event.target === this) fermerRegles()">
     <div class="modale modale-regles">
-      <h2>🕵️ Comment jouer a UnderPendu ?</h2>
-
-      <h3>🎮 Mode Classique (coop)</h3>
-      <ul>
-        <li>Chacun son tour, proposez une lettre pour deviner le mot ensemble.</li>
-        <li>6 erreurs et le pendu est complet : la manche est perdue.</li>
-        <li>Chaque bonne lettre rapporte des points (x1 facile, x1,5 moyen, x2 difficile) : le meilleur contributeur gagne le match.</li>
-      </ul>
-
-      <h3>🕵️ Mode Imposteur (3 joueurs min.)</h3>
-      <ul>
-        <li>Les innocents connaissent le mot, l'imposteur ne voit que l'indice.</li>
-        <li>L'imposteur doit bluffer en proposant des lettres plausibles.</li>
-        <li>A la fin de la manche, votez pour demasquer l'imposteur : en cas d'egalite, il gagne !</li>
-      </ul>
-
-      <h3>⏱️ Temps</h3>
-      <ul>
-        <li>Chaque manche dure 3 minutes, et tu as 20 secondes pour jouer ton tour.</li>
-        <li>Deconnecte ? Tu as 20 secondes pour revenir avant d'etre retire de la salle.</li>
-      </ul>
-
-      <h3>⌨️ Astuce</h3>
-      <ul>
-        <li>Tu peux taper les lettres directement au clavier quand c'est ton tour.</li>
-      </ul>
-
-      <button onclick="fermerRegles()">Compris !</button>
+      <h2 data-i18n="regles.titre">🕵️ Comment jouer a UnderPendu ?</h2>
+      <div id="contenu-regles"></div>
+      <button onclick="fermerRegles()" data-i18n="regles.compris">Compris !</button>
     </div>
   </div>
 
   <div class="toast" id="toast"></div>
 
+<script src="i18n.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

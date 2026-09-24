@@ -19,6 +19,8 @@ from websocket_manager import (
     MIN_JOUEURS_IMPOSTEUR,
     MANCHES_MIN,
     MANCHES_MAX,
+    COULEURS_AVATAR,
+    EMOJIS_AVATAR,
 )
 
 Base.metadata.create_all(bind=engine)
@@ -113,6 +115,86 @@ def obtenir_scores(token: str, db: Session = Depends(get_db)):
         }
         for s in scores
     ]
+
+
+RANGS = [(0, "novice"), (200, "detective"), (800, "inspecteur"), (2000, "commissaire"), (5000, "maitre_espion")]
+
+
+@app.get("/api/profil")
+def obtenir_profil(token: str, db: Session = Depends(get_db)):
+    """Retourne le profil du joueur : statistiques, rang, succes et 20 derniers scores."""
+    identifiant = lire_identifiant_depuis_token(token)
+    if not identifiant:
+        raise HTTPException(status_code=401, detail="Jeton invalide ou expire.")
+    utilisateur = db.query(Utilisateur).filter(Utilisateur.identifiant == identifiant).first()
+    if not utilisateur:
+        raise HTTPException(status_code=404, detail="Utilisateur introuvable.")
+
+    scores = (
+        db.query(Score)
+        .filter(Score.utilisateur_id == utilisateur.id)
+        .order_by(Score.date_partie.desc())
+        .all()
+    )
+    points_total = sum(s.points for s in scores)
+    par_difficulte: dict[str, int] = {}
+    for s in scores:
+        par_difficulte[s.difficulte] = par_difficulte.get(s.difficulte, 0) + 1
+
+    rang_index = max(i for i, (seuil, _) in enumerate(RANGS) if points_total >= seuil)
+    suivant = RANGS[rang_index + 1] if rang_index + 1 < len(RANGS) else None
+
+    return {
+        "identifiant": utilisateur.identifiant,
+        "date_inscription": utilisateur.date_creation.isoformat() if utilisateur.date_creation else None,
+        "stats": {
+            "points_total": points_total,
+            "victoires": len(scores),
+            "meilleur_score": max((s.points for s in scores), default=0),
+            "difficulte_favorite": max(par_difficulte, key=par_difficulte.get) if par_difficulte else None,
+            "victoires_difficile": par_difficulte.get("difficile", 0),
+        },
+        "rang": {
+            "cle": RANGS[rang_index][1],
+            "seuil": RANGS[rang_index][0],
+            "suivant_cle": suivant[1] if suivant else None,
+            "suivant_seuil": suivant[0] if suivant else None,
+        },
+        "historique": [
+            {
+                "points": s.points,
+                "difficulte": s.difficulte,
+                "mot": s.mot,
+                "date_partie": s.date_partie.isoformat() if s.date_partie else None,
+            }
+            for s in scores[:20]
+        ],
+    }
+
+
+class ChangementMotDePasseRequete(BaseModel):
+    token: str
+    ancien_mot_de_passe: str
+    nouveau_mot_de_passe: str
+
+
+@app.post("/api/mot-de-passe")
+def changer_mot_de_passe(donnees: ChangementMotDePasseRequete, db: Session = Depends(get_db)):
+    """Change le mot de passe du joueur connecte, apres verification de l'ancien."""
+    identifiant = lire_identifiant_depuis_token(donnees.token)
+    if not identifiant:
+        raise HTTPException(status_code=401, detail="Jeton invalide ou expire.")
+    utilisateur = db.query(Utilisateur).filter(Utilisateur.identifiant == identifiant).first()
+    if not utilisateur or not verifier_mot_de_passe(donnees.ancien_mot_de_passe, utilisateur.mot_de_passe_hache):
+        raise HTTPException(status_code=400, detail="Le mot de passe actuel est incorrect.")
+    if len(donnees.nouveau_mot_de_passe) < 6:
+        raise HTTPException(status_code=400, detail="Le mot de passe doit contenir au moins 6 caracteres.")
+    if len(donnees.nouveau_mot_de_passe) > 72:
+        raise HTTPException(status_code=400, detail="Le mot de passe ne doit pas depasser 72 caracteres.")
+
+    utilisateur.mot_de_passe_hache = hacher_mot_de_passe(donnees.nouveau_mot_de_passe)
+    db.commit()
+    return {"ok": True}
 
 
 @app.post("/api/salle/creer")
@@ -211,6 +293,7 @@ async def retirer_joueur(salle, code_salle: str, identifiant: str) -> None:
             try:
                 await joueur_restant.websocket.send_json({
                     "type": "salle_fermee",
+                    "code": "salle_fermee_hote", "params": {"h": identifiant},
                     "message": f"L'hote ({identifiant}) a quitte la salle. La partie est terminee.",
                 })
                 await joueur_restant.websocket.close(code=4005)
@@ -225,9 +308,7 @@ async def retirer_joueur(salle, code_salle: str, identifiant: str) -> None:
     salle.votes = {votant: cible for votant, cible in salle.votes.items()
                    if votant != identifiant and cible != identifiant}
 
-    await gestionnaire.diffuser(salle, {
-        "type": "chat_recu", "auteur": "Systeme", "texte": f"{identifiant} a quitte la salle.",
-    })
+    await gestionnaire.diffuser(salle, {"type": "systeme", "code": "joueur_parti", "params": {"j": identifiant}})
 
     if salle.phase in ("jeu", "vote") and len(salle.joueurs) < MIN_JOUEURS_CLASSIQUE:
         # Plus assez de joueurs pour continuer : retour en salle d'attente.
@@ -235,7 +316,8 @@ async def retirer_joueur(salle, code_salle: str, identifiant: str) -> None:
         gestionnaire.annuler_minuteur_tour(salle)
         salle.phase = "attente"
         await gestionnaire.diffuser(salle, {
-            "type": "erreur", "message": "Plus assez de joueurs : la partie est interrompue.",
+            "type": "erreur", "code": "plus_assez",
+            "message": "Plus assez de joueurs : la partie est interrompue.",
         })
     elif salle.phase == "jeu":
         salle.temps_restant_tour = salle.duree_tour
@@ -263,6 +345,20 @@ async def traiter_message(salle, identifiant: str, message: dict) -> None:
         await traiter_vote(salle, identifiant, message)
     elif type_message == "chat":
         await traiter_chat(salle, identifiant, message)
+    elif type_message == "profil":
+        await traiter_profil(salle, identifiant, message)
+
+
+async def traiter_profil(salle, identifiant: str, message: dict) -> None:
+    """Enregistre l'avatar choisi par le joueur (couleur + emoji), visible par toute la salle."""
+    joueur = gestionnaire.trouver_joueur(salle, identifiant)
+    if joueur is None:
+        return
+    couleur = message.get("couleur")
+    emoji = message.get("emoji")
+    joueur.couleur = couleur if couleur in COULEURS_AVATAR else None
+    joueur.emoji = emoji if emoji in EMOJIS_AVATAR else None
+    await gestionnaire.diffuser_etat(salle)
 
 
 async def traiter_chat(salle, identifiant: str, message: dict) -> None:
@@ -293,6 +389,7 @@ async def demarrer_partie(salle, identifiant: str, message: dict) -> None:
     if identifiant != salle.hote:
         await gestionnaire.diffuser(salle, {
             "type": "erreur",
+            "code": "hote_seul", "params": {"h": salle.hote},
             "message": f"Seul l'hote ({salle.hote}) peut demarrer la partie.",
         })
         return
@@ -303,12 +400,14 @@ async def demarrer_partie(salle, identifiant: str, message: dict) -> None:
     if mode == "imposteur" and nombre_joueurs < MIN_JOUEURS_IMPOSTEUR:
         await gestionnaire.diffuser(salle, {
             "type": "erreur",
+            "code": "min_imposteur", "params": {"n": MIN_JOUEURS_IMPOSTEUR},
             "message": f"Il faut au moins {MIN_JOUEURS_IMPOSTEUR} joueurs pour le mode Imposteur.",
         })
         return
     if mode == "classique" and nombre_joueurs < MIN_JOUEURS_CLASSIQUE:
         await gestionnaire.diffuser(salle, {
             "type": "erreur",
+            "code": "min_classique", "params": {"n": MIN_JOUEURS_CLASSIQUE},
             "message": f"Il faut au moins {MIN_JOUEURS_CLASSIQUE} joueurs pour demarrer.",
         })
         return

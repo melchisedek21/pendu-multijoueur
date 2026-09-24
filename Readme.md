@@ -44,7 +44,12 @@ L'hote choisit, avant de lancer la partie, **le nombre de manches** du match (1 
 - **Code de salle copiable** en un clic pour inviter des amis
 - **Jeu au clavier** : on peut taper les lettres directement quand c'est son tour
 - **Mot de passe affichable/masquable** a la connexion
-- **Historique des scores** consultable par chaque utilisateur, enregistre en base a la fin de chaque match
+- **Profil joueur** : rang qui evolue avec les points (Novice → Detective → Inspecteur → Commissaire → Maitre espion), statistiques, succes a debloquer, historique des scores
+- **Avatar personnalisable** (couleur + emoji), visible par les autres joueurs dans les salles
+- **Parametres** : changer son mot de passe, se deconnecter, langue, animations, vibration quand c'est son tour (telephone), a propos, aide
+- **3 langues** : francais, anglais, espagnol (detection automatique selon le navigateur ; chaque joueur choisit la sienne, meme dans la meme salle). Les mots a deviner et leurs indices restent en francais
+- **Accueil anime** : lettres flottantes, mini-pendu de demonstration (desactivable dans les parametres)
+- **Adapte au telephone et a la tablette** : colonnes empilees, grandes touches, profil en plein ecran
 - Interface jouable au navigateur, sans installation, sur tout appareil
 
 ## Structure du projet
@@ -70,7 +75,8 @@ pendu_multijoueur/
     ├── logo.svg              # Icone du jeu (aussi utilisee comme favicon)
     ├── logo-horizontal.svg   # Logo complet (icone + nom)
     ├── index.html            # Interface (auth, salle, jeu, historique, ecrans de fin)
-    ├── app.js                 # Logique client (WebSocket, minuteurs, classements, reconnexion)
+    ├── app.js                 # Logique client (WebSocket, minuteurs, classements, profil, parametres)
+    ├── i18n.js                # Traductions de l'interface (francais, anglais, espagnol)
     └── style.css
 ```
 
@@ -112,4 +118,5 @@ Une fois deploye, l'URL fournie par Render est accessible depuis n'importe quel 
 
 - Rendre la duree de manche/tour configurable par l'hote depuis l'interface
 - Classement global inter-parties (au-dela de l'historique personnel actuel)
-- Avatars personnalisables
+- Listes de mots en anglais et en espagnol (aujourd'hui seule l'interface est traduite)
+- Enregistrer l'avatar et les preferences sur le compte (aujourd'hui gardes sur l'appareil)
