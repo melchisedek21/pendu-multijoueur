@@ -46,6 +46,7 @@ L'hote choisit, avant de lancer la partie, **le nombre de manches** du match (1 
 - **Mot de passe affichable/masquable** a la connexion
 - **Profil joueur** : rang qui evolue avec les points (Novice → Detective → Inspecteur → Commissaire → Maitre espion), statistiques, succes a debloquer, historique des scores
 - **Avatar personnalisable** (couleur + emoji), visible par les autres joueurs dans les salles
+- **Preferences liees au compte** : avatar, langue et reglages sont enregistres en base et retrouves sur n'importe quel appareil (PC, telephone, tablette)
 - **Parametres** : changer son mot de passe, se deconnecter, langue, animations, vibration quand c'est son tour (telephone), a propos, aide
 - **3 langues** : francais, anglais, espagnol (detection automatique selon le navigateur ; chaque joueur choisit la sienne, meme dans la meme salle). Les mots a deviner et leurs indices restent en francais
 - **Accueil anime** : lettres flottantes, mini-pendu de demonstration (desactivable dans les parametres)
@@ -58,7 +59,7 @@ L'hote choisit, avant de lancer la partie, **le nombre de manches** du match (1 
 pendu_multijoueur/
 ├── main.py                # Point d'entree FastAPI (routes API + WebSocket + logique de manches)
 ├── database.py             # Configuration SQLAlchemy (SQLite en local, PostgreSQL en prod)
-├── models.py                # Modeles Utilisateur et Score
+├── models.py                # Modeles Utilisateur, Score et Preferences
 ├── auth.py                  # Hashage des mots de passe, jetons JWT
 ├── game_logic.py             # Categories de mots, difficulte, calcul des points par contribution
 ├── websocket_manager.py       # Gestion des salles, roles, votes, minuteurs, reconnexion
@@ -119,4 +120,3 @@ Une fois deploye, l'URL fournie par Render est accessible depuis n'importe quel 
 - Rendre la duree de manche/tour configurable par l'hote depuis l'interface
 - Classement global inter-parties (au-dela de l'historique personnel actuel)
 - Listes de mots en anglais et en espagnol (aujourd'hui seule l'interface est traduite)
-- Enregistrer l'avatar et les preferences sur le compte (aujourd'hui gardes sur l'appareil)

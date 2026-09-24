@@ -17,13 +17,70 @@ const ERREURS_MAX = 6;
 const REGEX_IDENTIFIANT = /^[A-Za-z0-9_]{3,20}$/;
 const LOCALES_DATE = { fr: "fr-FR", en: "en-GB", es: "es-ES" };
 
-/* ---------- Preferences (gardees sur l'appareil) ---------- */
+/* ---------- Preferences (liees au compte, avec une copie sur l'appareil) ---------- */
 
 const PREFERENCES_DEFAUT = { couleur: null, emoji: null, animations: true, vibrations: true };
+const CHAMPS_PREFERENCES = ["couleur", "emoji", "langue", "animations", "vibrations"];
 let preferences = { ...PREFERENCES_DEFAUT, ...JSON.parse(localStorage.getItem("pendu_prefs") || "{}") };
 
 function enregistrerPreferences() {
   localStorage.setItem("pendu_prefs", JSON.stringify(preferences));
+}
+
+/** Enregistre les champs modifies sur le compte, pour les retrouver sur un autre appareil. */
+async function sauvegarderPreferencesServeur(champs) {
+  enregistrerPreferences();
+  if (!token) return;
+  const corps = { token };
+  champs.forEach(cle => { corps[cle] = cle === "langue" ? langueActuelle : preferences[cle]; });
+  try {
+    await fetch("/api/preferences", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(corps),
+    });
+  } catch {
+    // Hors ligne : la copie locale suffit, elle sera renvoyee a la prochaine connexion
+  }
+}
+
+/** A la connexion : applique les preferences du compte (elles priment sur celles de l'appareil). */
+async function synchroniserPreferences() {
+  try {
+    const reponse = await fetch(`/api/preferences?token=${encodeURIComponent(token)}`);
+    if (!reponse.ok) return;
+    const serveur = await reponse.json();
+    if (!serveur.enregistrees) {
+      // Premier passage de ce compte : on garde ce qu'il avait deja regle sur cet appareil
+      if (!preferences.proprietaire || preferences.proprietaire === identifiant) {
+        preferences.proprietaire = identifiant;
+        await sauvegarderPreferencesServeur(CHAMPS_PREFERENCES);
+      }
+      return;
+    }
+    ["couleur", "emoji", "animations", "vibrations"].forEach(cle => { preferences[cle] = serveur[cle]; });
+    preferences.proprietaire = identifiant;
+    enregistrerPreferences();
+    appliquerPreferences();
+    if (serveur.langue && serveur.langue !== langueActuelle) {
+      synchroEnCours = true;
+      changerLangue(serveur.langue);
+      synchroEnCours = false;
+    }
+  } catch {
+    // Serveur injoignable : on garde les preferences de l'appareil
+  }
+}
+
+let synchroEnCours = false;
+
+function appliquerPreferences() {
+  appliquerPreferenceAnimations();
+  document.getElementById("reglage-animations").checked = preferences.animations;
+  document.getElementById("reglage-vibrations").checked = preferences.vibrations;
+  rafraichirMoi();
+  if (!document.getElementById("overlay-profil").classList.contains("cache")) construireChoixAvatar();
+  envoyerAvatar();
 }
 
 const ANIMATIONS_REDUITES = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -206,6 +263,7 @@ function connecterSession(jeton, id) {
   document.getElementById("nom-joueur").innerText = identifiant;
   rafraichirMoi();
   afficherEcran("ecran-salle");
+  synchroniserPreferences();
 }
 
 function deconnexion() {
@@ -214,6 +272,9 @@ function deconnexion() {
   token = null;
   identifiant = null;
   sessionStorage.clear();
+  // L'avatar appartient au compte : on ne le laisse pas au prochain joueur de cet appareil
+  preferences = { ...preferences, couleur: null, emoji: null, proprietaire: null };
+  enregistrerPreferences();
   fermerProfil();
   document.getElementById("champ-mot-de-passe").value = "";
   document.getElementById("message-salle").innerText = "";
@@ -999,7 +1060,7 @@ function construireChoixAvatar() {
 
 function choisirAvatar(type, valeur) {
   preferences[type] = valeur;
-  enregistrerPreferences();
+  sauvegarderPreferencesServeur([type]);
   construireChoixAvatar();
   rafraichirMoi();
   envoyerAvatar();
@@ -1017,13 +1078,13 @@ function construireListeLangues() {
 
 document.getElementById("reglage-animations").addEventListener("change", (e) => {
   preferences.animations = e.target.checked;
-  enregistrerPreferences();
+  sauvegarderPreferencesServeur(["animations"]);
   appliquerPreferenceAnimations();
 });
 
 document.getElementById("reglage-vibrations").addEventListener("change", (e) => {
   preferences.vibrations = e.target.checked;
-  enregistrerPreferences();
+  sauvegarderPreferencesServeur(["vibrations"]);
   if (preferences.vibrations && navigator.vibrate) navigator.vibrate(60);
 });
 
@@ -1062,7 +1123,10 @@ function rafraichirTextesDynamiques() {
   if (dernierProfil) afficherProfil();
 }
 
-document.addEventListener("langue-changee", rafraichirTextesDynamiques);
+document.addEventListener("langue-changee", () => {
+  rafraichirTextesDynamiques();
+  if (!synchroEnCours) sauvegarderPreferencesServeur(["langue"]);
+});
 
 /* ---------- Toast ---------- */
 
@@ -1094,6 +1158,7 @@ document.getElementById("reglage-vibrations").checked = preferences.vibrations;
   identifiant = identifiantSauvegarde;
   document.getElementById("nom-joueur").innerText = identifiant;
   rafraichirMoi();
+  synchroniserPreferences();
 
   afficherEcran("ecran-salle");
   if (salleSauvegardee) {

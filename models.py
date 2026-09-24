@@ -1,6 +1,6 @@
 """Modeles de base de donnees : utilisateurs et scores."""
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Boolean, Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -33,3 +33,20 @@ class Score(Base):
     date_partie = Column(DateTime(timezone=True), server_default=func.now())
 
     utilisateur = relationship("Utilisateur", back_populates="scores")
+
+
+class Preferences(Base):
+    """Preferences d'un joueur (avatar, langue, reglages), liees au compte pour le suivre
+    sur tous ses appareils. Table separee : l'ajouter ne modifie pas les tables existantes.
+    """
+
+    __tablename__ = "preferences"
+
+    id = Column(Integer, primary_key=True, index=True)
+    utilisateur_id = Column(Integer, ForeignKey("utilisateurs.id"), unique=True, nullable=False, index=True)
+    couleur = Column(String, nullable=True)
+    emoji = Column(String, nullable=True)
+    langue = Column(String, nullable=True)
+    animations = Column(Boolean, nullable=False, default=True)
+    vibrations = Column(Boolean, nullable=False, default=True)
+    date_maj = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

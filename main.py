@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from database import Base, engine, get_db, SessionLocal
-from models import Utilisateur, Score
+from models import Utilisateur, Score, Preferences
 from auth import hacher_mot_de_passe, verifier_mot_de_passe, creer_token, lire_identifiant_depuis_token
 from game_logic import choisir_mot_et_indice, ERREURS_MAX
 from websocket_manager import (
@@ -197,6 +197,92 @@ def changer_mot_de_passe(donnees: ChangementMotDePasseRequete, db: Session = Dep
     return {"ok": True}
 
 
+LANGUES = ("fr", "en", "es")
+
+
+def lire_preferences(db: Session, utilisateur_id: int) -> Preferences | None:
+    return db.query(Preferences).filter(Preferences.utilisateur_id == utilisateur_id).first()
+
+
+def preferences_en_dict(prefs: Preferences | None) -> dict:
+    """Preferences du joueur ; valeurs par defaut s'il n'a encore rien enregistre."""
+    return {
+        "enregistrees": prefs is not None,
+        "couleur": prefs.couleur if prefs else None,
+        "emoji": prefs.emoji if prefs else None,
+        "langue": prefs.langue if prefs else None,
+        "animations": prefs.animations if prefs else True,
+        "vibrations": prefs.vibrations if prefs else True,
+    }
+
+
+def utilisateur_depuis_token(token: str, db: Session) -> Utilisateur:
+    identifiant = lire_identifiant_depuis_token(token)
+    utilisateur = (
+        db.query(Utilisateur).filter(Utilisateur.identifiant == identifiant).first() if identifiant else None
+    )
+    if not utilisateur:
+        raise HTTPException(status_code=401, detail="Jeton invalide ou expire.")
+    return utilisateur
+
+
+@app.get("/api/preferences")
+def obtenir_preferences(token: str, db: Session = Depends(get_db)):
+    """Retourne les preferences liees au compte (avatar, langue, reglages), pour tous ses appareils."""
+    utilisateur = utilisateur_depuis_token(token, db)
+    return preferences_en_dict(lire_preferences(db, utilisateur.id))
+
+
+class PreferencesRequete(BaseModel):
+    token: str
+    couleur: str | None = None
+    emoji: str | None = None
+    langue: str | None = None
+    animations: bool | None = None
+    vibrations: bool | None = None
+
+
+@app.post("/api/preferences")
+def enregistrer_preferences(donnees: PreferencesRequete, db: Session = Depends(get_db)):
+    """Enregistre les preferences envoyees (seuls les champs fournis sont modifies)."""
+    utilisateur = utilisateur_depuis_token(donnees.token, db)
+    champs = donnees.model_dump(exclude_unset=True, exclude={"token"})
+
+    # Valeurs inconnues refusees : on ne stocke que ce que l'interface sait afficher
+    if "couleur" in champs and champs["couleur"] not in COULEURS_AVATAR:
+        champs["couleur"] = None
+    if "emoji" in champs and champs["emoji"] not in EMOJIS_AVATAR:
+        champs["emoji"] = None
+    if "langue" in champs and champs["langue"] not in LANGUES:
+        champs["langue"] = None
+    for cle in ("animations", "vibrations"):
+        if cle in champs and champs[cle] is None:
+            del champs[cle]
+
+    prefs = lire_preferences(db, utilisateur.id)
+    if prefs is None:
+        prefs = Preferences(utilisateur_id=utilisateur.id, animations=True, vibrations=True)
+        db.add(prefs)
+    for cle, valeur in champs.items():
+        setattr(prefs, cle, valeur)
+    db.commit()
+    return preferences_en_dict(prefs)
+
+
+def charger_avatar(identifiant: str) -> tuple[str | None, str | None]:
+    """Avatar enregistre sur le compte, pour l'afficher des l'entree dans une salle."""
+    try:
+        db = SessionLocal()
+        try:
+            utilisateur = db.query(Utilisateur).filter(Utilisateur.identifiant == identifiant).first()
+            prefs = lire_preferences(db, utilisateur.id) if utilisateur else None
+            return (prefs.couleur, prefs.emoji) if prefs else (None, None)
+        finally:
+            db.close()
+    except Exception:
+        return None, None  # l'avatar est un bonus : ne jamais bloquer l'entree dans la salle
+
+
 @app.post("/api/salle/creer")
 def creer_salle(token: str):
     """Cree une nouvelle salle de jeu et retourne son code a 5 caracteres."""
@@ -228,15 +314,17 @@ async def websocket_jeu(websocket: WebSocket, code_salle: str, token: str):
 
     await websocket.accept()
 
+    couleur, emoji = charger_avatar(identifiant)
     if joueur_existant is not None:
         # Reconnexion (rafraichissement de page, coupure reseau...) : on reprend la place existante.
         gestionnaire.annuler_deconnexion(salle, identifiant)
         joueur_existant.websocket = websocket
         joueur_existant.deconnecte = False
+        joueur_existant.couleur, joueur_existant.emoji = couleur, emoji
     else:
         if not salle.joueurs:
             salle.hote = identifiant
-        salle.joueurs.append(Joueur(identifiant=identifiant, websocket=websocket))
+        salle.joueurs.append(Joueur(identifiant=identifiant, websocket=websocket, couleur=couleur, emoji=emoji))
 
     await gestionnaire.diffuser_etat(salle)
 
