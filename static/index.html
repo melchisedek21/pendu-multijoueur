@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UnderPendu — Pendu × Imposteur</title>
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<meta name="theme-color" content="#050b1b">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -11,10 +13,26 @@
 </head>
 <body>
 
+  <!-- FOND ANIME (lettres qui montent), visible hors partie -->
+  <div id="fond-anime" class="fond-anime" aria-hidden="true"></div>
+
   <!-- ECRAN AUTHENTIFICATION -->
   <div id="ecran-auth" class="ecran-simple">
+    <div class="accueil-split">
+    <div class="vitrine">
+      <h2 class="vitrine-titre">Le pendu ou <span>l'un de vous ment.</span></h2>
+      <p class="vitrine-texte">Devinez le mot a plusieurs... et demasquez l'imposteur qui, lui, ne le connait pas.</p>
+      <div class="demo-mot" id="demo-mot" aria-hidden="true"></div>
+      <div class="demo-essais" id="demo-essais" aria-hidden="true"></div>
+      <ul class="vitrine-atouts">
+        <li>👥 2 a 6 joueurs</li>
+        <li>🕵️ Mode Imposteur</li>
+        <li>💬 Chat en direct</li>
+        <li>📱 Sans installation</li>
+      </ul>
+    </div>
     <div class="carte-auth">
-      <div class="brand-icon">🕵️</div>
+      <img class="logo-auth" src="logo.svg" alt="">
       <h1>UNDER<span>PENDU</span></h1>
       <p class="sous-titre">Pendu × Imposteur</p>
       <input id="champ-identifiant" placeholder="Identifiant (3-20 caracteres)" maxlength="20" />
@@ -28,6 +46,7 @@
         <button onclick="connexion()">Se connecter</button>
       </div>
       <p id="message-auth" class="message"></p>
+    </div>
     </div>
   </div>
 
@@ -61,7 +80,7 @@
     <header class="topbar">
       <div class="brand">
         <button class="brand-bouton" onclick="ouvrirRegles()" title="Comment jouer ?">
-          <span class="brand-icon">🕵️</span>
+          <img class="logo-entete" src="logo.svg" alt="">
           <span class="brand-texte">
             <span class="brand-titre">UNDER<span>PENDU</span></span>
             <span class="brand-aide">❔ Comment jouer ?</span>

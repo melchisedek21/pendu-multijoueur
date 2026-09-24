@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UnderPendu — Identité visuelle et aperçu du jeu</title>
+<link rel="icon" type="image/svg+xml" href="../static/logo.svg">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #050b1b; --carte: #0b1834; --bord: rgba(104, 139, 255, .25);
+    --violet: #7c3cff; --violet-clair: #8c5cff; --vert: #20d98a; --rouge: #ff405b;
+    --texte: #f5f7ff; --muted: #8e9bb9;
+  }
+  body {
+    background: radial-gradient(circle at 50% 0%, rgba(80, 70, 220, .22), transparent 40%), var(--bg);
+    color: var(--texte); font-family: "Inter", system-ui, sans-serif; line-height: 1.5;
+  }
+  .page { width: min(1200px, 100%); margin: auto; padding: 56px 32px 80px; }
+  section { margin-top: 72px; }
+  h2 { font-size: 28px; letter-spacing: -.5px; margin-bottom: 6px; }
+  h2 small { display: block; font-size: 13px; font-weight: 600; letter-spacing: 3px; color: var(--violet-clair); text-transform: uppercase; margin-bottom: 4px; }
+  .intro { color: var(--muted); max-width: 720px; margin-bottom: 24px; }
+  .carte { background: linear-gradient(145deg, rgba(12, 28, 60, .94), rgba(4, 15, 34, .94)); border: 1px solid var(--bord); border-radius: 18px; padding: 24px; }
+  .grille { display: grid; gap: 20px; }
+  .g2 { grid-template-columns: repeat(2, 1fr); }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+  .g6 { grid-template-columns: repeat(6, 1fr); }
+
+  /* EN-TETE */
+  .hero { text-align: center; }
+  .hero img { width: min(720px, 100%); }
+  .hero p { color: var(--muted); font-size: 18px; margin-top: 18px; }
+  .tags { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
+  .tag { border: 1px solid var(--bord); background: rgba(8, 21, 48, .9); border-radius: 30px; padding: 7px 14px; font-size: 13px; }
+
+  /* LOGO */
+  .logo-principal { display: grid; grid-template-columns: 280px 1fr; gap: 32px; align-items: center; }
+  .logo-principal img { width: 100%; }
+  .explication li { margin: 10px 0 10px 18px; color: #d7def0; }
+  .explication strong { color: var(--texte); }
+  .tailles { display: flex; align-items: end; gap: 28px; flex-wrap: wrap; }
+  .tailles figure { text-align: center; color: var(--muted); font-size: 12px; }
+  .tailles img { display: block; margin: 0 auto 8px; }
+  .fond-clair { background: #f3f5fb; color: #475068; }
+
+  /* COULEURS */
+  .couleur { border-radius: 16px; overflow: hidden; border: 1px solid var(--bord); }
+  .couleur .pastille { height: 96px; }
+  .couleur div:last-child { padding: 12px; font-size: 13px; background: var(--carte); }
+  .couleur strong { display: block; }
+  .couleur code { color: var(--muted); font-size: 12px; }
+
+  /* TYPO */
+  .typo-aa { font-size: 96px; font-weight: 800; letter-spacing: -4px; line-height: 1; }
+  .typo-aa span { color: var(--violet-clair); }
+  .graisses p { margin: 8px 0; }
+  .mono { font-family: monospace; font-size: 34px; font-weight: 700; letter-spacing: 6px; }
+
+  /* COMPOSANTS (reprennent le style du jeu) */
+  .composants { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+  .btn { border: 0; border-radius: 10px; padding: 10px 18px; background: var(--violet); color: white; font: inherit; }
+  .btn.secondaire { background: transparent; border: 1px solid var(--bord); }
+  .btn.danger { background: #e74c3c; width: 44px; padding: 10px 0; }
+  .btn.vote { background: #e67e22; }
+  .touche { width: 42px; height: 42px; border-radius: 8px; background: #172743; display: grid; place-items: center; font-weight: 700; }
+  .touche.ok { background: var(--vert); color: #03170f; }
+  .touche.ko { background: var(--rouge); }
+  .pill { background: rgba(8, 21, 48, .9); border: 1px solid var(--bord); border-radius: 13px; padding: 9px 14px; font-size: 14px; }
+  .badge { color: #d4b4ff; background: rgba(124, 60, 255, .22); border: 1px solid rgba(150, 100, 255, .35); padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .coeurs { color: var(--rouge); letter-spacing: 4px; font-size: 20px; }
+  .coeurs span { color: #273249; }
+  .minuteur { background: rgba(230, 126, 34, .18); border: 1px solid rgba(230, 126, 34, .4); color: #f6a75c; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; }
+
+  /* ECRANS */
+  .ecran { margin: 0; }
+  .ecran img { width: 100%; display: block; border-radius: 14px; border: 1px solid var(--bord); box-shadow: 0 24px 60px rgba(0, 0, 0, .45); }
+  .ecran figcaption { margin-top: 12px; }
+  .ecran figcaption strong { display: block; }
+  .ecran figcaption span { color: var(--muted); font-size: 14px; }
+  .etape { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--violet); font-size: 13px; font-weight: 800; margin-right: 8px; }
+  .mobile { display: grid; grid-template-columns: 300px 1fr; gap: 32px; align-items: center; }
+  .mobile img { width: 100%; border-radius: 28px; border: 6px solid #1a2442; }
+
+  .regles-ton li { margin: 8px 0 8px 18px; color: #d7def0; }
+  footer { margin-top: 80px; text-align: center; color: var(--muted); font-size: 13px; }
+
+  @media (max-width: 900px) {
+    .g2, .g3, .logo-principal, .mobile { grid-template-columns: 1fr; }
+    .g6 { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ===== EN-TETE ===== -->
+  <header class="hero">
+    <img src="../static/logo-horizontal.svg" alt="Logo UnderPendu">
+    <p>Le jeu du pendu en ligne où l'un de vous ment.<br>Jusqu'à 6 joueurs, dans le navigateur, sur PC comme sur téléphone.</p>
+    <div class="tags">
+      <span class="tag">🎮 Mode Classique (coop)</span>
+      <span class="tag">🕵️ Mode Imposteur</span>
+      <span class="tag">💬 Chat en direct</span>
+      <span class="tag">⏱️ Manches chronométrées</span>
+      <span class="tag">📱 Sans installation</span>
+    </div>
+  </header>
+
+  <!-- ===== LOGO ===== -->
+  <section>
+    <h2><small>01 — Logo</small>Une potence, un espion</h2>
+    <p class="intro">Le logo réunit les deux jeux qui composent UnderPendu : la potence du pendu classique, et un pendu qui porte le chapeau et le masque de l'imposteur.</p>
+    <div class="carte logo-principal">
+      <img src="../static/logo.svg" alt="Icône UnderPendu">
+      <ul class="explication">
+        <li><strong>La potence blanche</strong> : le pendu, reconnaissable au premier coup d'œil, même en tout petit.</li>
+        <li><strong>Le chapeau et le masque</strong> : l'imposteur caché parmi les joueurs, clin d'œil au jeu « Undercover ».</li>
+        <li><strong>Les yeux verts</strong> : la même couleur que les bonnes lettres du clavier.</li>
+        <li><strong>Le manteau violet</strong> : la couleur principale du jeu, présente sur tous les boutons.</li>
+        <li><strong>Les tirets sous « PENDU »</strong> : les cases du mot à deviner, avec une lettre trouvée en vert.</li>
+      </ul>
+    </div>
+    <div class="grille g2" style="margin-top:20px">
+      <div class="carte">
+        <p class="intro" style="margin-bottom:16px">L'icône reste lisible à toutes les tailles (onglet du navigateur, écran d'accueil du téléphone).</p>
+        <div class="tailles">
+          <figure><img src="../static/logo.svg" width="128" alt="">128 px</figure>
+          <figure><img src="../static/logo.svg" width="64" alt="">64 px</figure>
+          <figure><img src="../static/logo.svg" width="32" alt="">32 px</figure>
+          <figure><img src="../static/logo.svg" width="16" alt="">16 px (onglet)</figure>
+        </div>
+      </div>
+      <div class="carte fond-clair">
+        <p style="margin-bottom:16px">Sur fond clair, l'icône garde son fond sombre arrondi : elle ne disparaît jamais.</p>
+        <div class="tailles">
+          <figure><img src="../static/logo.svg" width="96" alt="">icône</figure>
+          <figure><img src="../static/logo-horizontal.svg" width="300" alt="">logo complet</figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== COULEURS ===== -->
+  <section>
+    <h2><small>02 — Couleurs</small>Une ambiance de nuit, de mystère</h2>
+    <p class="intro">Un fond bleu nuit presque noir, une couleur d'action violette, et deux couleurs de signal : vert quand on trouve, rouge quand on se trompe.</p>
+    <div class="grille g6">
+      <div class="couleur"><div class="pastille" style="background:#050b1b"></div><div><strong>Nuit</strong><code>#050B1B</code><br><small>Fond</small></div></div>
+      <div class="couleur"><div class="pastille" style="background:#0b1834"></div><div><strong>Encre</strong><code>#0B1834</code><br><small>Cartes, panneaux</small></div></div>
+      <div class="couleur"><div class="pastille" style="background:#7c3cff"></div><div><strong>Violet</strong><code>#7C3CFF</code><br><small>Boutons, marque</small></div></div>
+      <div class="couleur"><div class="pastille" style="background:#20d98a"></div><div><strong>Vert</strong><code>#20D98A</code><br><small>Bonne lettre</small></div></div>
+      <div class="couleur"><div class="pastille" style="background:#ff405b"></div><div><strong>Rouge</strong><code>#FF405B</code><br><small>Erreur, vies</small></div></div>
+      <div class="couleur"><div class="pastille" style="background:#f5f7ff"></div><div><strong>Lune</strong><code>#F5F7FF</code><br><small>Texte, potence</small></div></div>
+    </div>
+  </section>
+
+  <!-- ===== TYPOGRAPHIE ===== -->
+  <section>
+    <h2><small>03 — Typographie</small>Inter, et une police machine à écrire pour le mot</h2>
+    <div class="grille g2">
+      <div class="carte">
+        <div class="typo-aa">Aa<span>Aa</span></div>
+        <p style="margin-top:12px"><strong>Inter</strong> — titres, boutons et textes. Moderne et très lisible sur écran.</p>
+        <div class="graisses" style="margin-top:14px">
+          <p style="font-weight:800;font-size:22px">UNDERPENDU — ExtraBold 800</p>
+          <p style="font-weight:600">Tour de rio — SemiBold 600</p>
+          <p style="font-weight:400;color:var(--muted)">Info de la manche — Regular 400</p>
+        </div>
+      </div>
+      <div class="carte">
+        <p class="mono">p a p i _ _ _ _</p>
+        <p style="margin-top:12px"><strong>Monospace</strong> — le mot à deviner. Toutes les lettres ont la même largeur, comme les cases du pendu sur papier.</p>
+        <p class="mono" style="margin-top:16px">o t a r i <span style="color:var(--rouge)">e</span></p>
+        <p style="color:var(--muted);font-size:14px">En fin de manche, le mot est révélé : les lettres non trouvées apparaissent en rouge.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== COMPOSANTS ===== -->
+  <section>
+    <h2><small>04 — Éléments d'interface</small>Les briques du jeu</h2>
+    <p class="intro">Coins arrondis, cartes en léger dégradé, bordures bleutées fines : tous les écrans sont construits avec ces mêmes éléments.</p>
+    <div class="carte">
+      <div class="composants">
+        <button class="btn">S'inscrire</button>
+        <button class="btn">Démarrer la partie</button>
+        <button class="btn secondaire">📜 Mon historique</button>
+        <button class="btn vote">rio</button>
+        <button class="btn danger">✕</button>
+        <span class="pill">👥 3/6 joueurs</span>
+        <span class="pill">🕵️ Imposteur</span>
+        <span class="pill">Manche 1/3</span>
+      </div>
+      <div class="composants" style="margin-top:20px">
+        <span class="touche">A</span><span class="touche ok">P</span><span class="touche ok">I</span><span class="touche ko">Z</span><span class="touche">M</span>
+        <span class="coeurs">♥♥♥♥♥<span>♥</span></span>
+        <span class="minuteur">⏳ 12s pour jouer</span>
+        <span class="badge">IMPOSTEUR</span>
+        <span class="badge">INNOCENT</span>
+        <span class="avatar" style="background:#347ff2">K</span>
+        <span class="avatar" style="background:#22c993">R</span>
+        <span class="avatar" style="background:#e544ad">T</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PARCOURS ===== -->
+  <section>
+    <h2><small>05 — Le jeu en images</small>Le parcours d'un joueur</h2>
+    <p class="intro">Captures réelles du jeu, prises pendant une vraie partie à 3 joueurs.</p>
+
+    <div class="grille g2">
+      <figure class="ecran"><img src="captures/01-connexion.png" alt="">
+        <figcaption><strong><span class="etape">1</span>Connexion</strong><span>Un compte en 5 secondes. Le bouton 👁️ affiche le mot de passe.</span></figcaption></figure>
+      <figure class="ecran"><img src="captures/02-accueil.png" alt="">
+        <figcaption><strong><span class="etape">2</span>Accueil</strong><span>Créer une salle, ou en rejoindre une avec son code à 5 caractères.</span></figcaption></figure>
+    </div>
+
+    <figure class="ecran" style="margin-top:28px"><img src="captures/03-salle-attente.png" alt="">
+      <figcaption><strong><span class="etape">3</span>Salle d'attente</strong><span>L'hôte choisit le mode, la catégorie, la difficulté et le nombre de manches. Le code de salle se copie en un clic.</span></figcaption></figure>
+
+    <div class="grille g2" style="margin-top:28px">
+      <figure class="ecran"><img src="captures/04-jeu-innocent.png" alt="">
+        <figcaption><strong><span class="etape">4</span>Vue d'un innocent</strong><span>Il connaît le mot (carte « Ton rôle ») et propose les bonnes lettres… sans trop se trahir.</span></figcaption></figure>
+      <figure class="ecran"><img src="captures/05-jeu-imposteur.png" alt="">
+        <figcaption><strong><span class="etape">4</span>Vue de l'imposteur</strong><span>Même écran, même indice, mais le mot est caché : « ??? ». Il doit bluffer.</span></figcaption></figure>
+    </div>
+
+    <div class="grille g2" style="margin-top:28px">
+      <figure class="ecran"><img src="captures/07-vote.png" alt="">
+        <figcaption><strong><span class="etape">5</span>Le vote</strong><span>Mot trouvé ou pendu complet : chacun désigne celui qu'il soupçonne.</span></figcaption></figure>
+      <figure class="ecran"><img src="captures/08-fin-manche.png" alt="">
+        <figcaption><strong><span class="etape">6</span>Fin de manche</strong><span>Le verdict, le vrai imposteur et le mot. L'hôte lance la manche suivante.</span></figcaption></figure>
+    </div>
+
+    <div class="grille g2" style="margin-top:28px">
+      <figure class="ecran"><img src="captures/09-fin-match.png" alt="">
+        <figcaption><strong><span class="etape">7</span>Fin du match</strong><span>Classement final. Même en cas de défaite, le mot est révélé.</span></figcaption></figure>
+      <figure class="ecran"><img src="captures/06-regles.png" alt="">
+        <figcaption><strong><span class="etape">?</span>Comment jouer</strong><span>Un clic sur le nom du jeu, en haut à gauche, ouvre les règles à tout moment.</span></figcaption></figure>
+    </div>
+  </section>
+
+  <!-- ===== MOBILE ===== -->
+  <section>
+    <h2><small>06 — Sur téléphone</small>Le même jeu, dans la poche</h2>
+    <div class="mobile">
+      <img src="captures/11-mobile-connexion.png" alt="UnderPendu sur téléphone">
+      <div class="carte regles-ton">
+        <p style="margin-bottom:10px"><strong>Aucune application à installer</strong> : on ouvre le lien de la salle dans le navigateur du téléphone, et on joue.</p>
+        <ul>
+          <li>Les colonnes (joueurs, jeu, chat) s'empilent sur les petits écrans.</li>
+          <li>Le clavier du jeu reste grand et facile à toucher.</li>
+          <li>La couleur de la barre du navigateur s'accorde au fond du jeu.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TON ===== -->
+  <section>
+    <h2><small>07 — Ton</small>Comment le jeu parle</h2>
+    <div class="carte regles-ton">
+      <ul>
+        <li><strong>Tutoiement</strong>, phrases courtes : « C'est ton tour ! », « Ne révèle jamais ce mot dans le chat ! »</li>
+        <li><strong>Un peu de mystère</strong> : « Choisis bien tes mots… et tes alliés. 🕵️ »</li>
+        <li><strong>Des emojis comme repères</strong>, un par idée : 🎯 le mot, 💡 l'indice, ⏱️ le temps, 💬 le chat.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>UnderPendu — Pendu × Imposteur · identité visuelle v1</footer>
+</div>
+</body>
+</html>

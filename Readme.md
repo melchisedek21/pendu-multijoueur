@@ -1,4 +1,8 @@
+<p align="center"><img src="static/logo-horizontal.svg" alt="UnderPendu" width="520"></p>
+
 # UnderPendu — Pendu Multijoueur (Classique + Imposteur)
+
+> Identite visuelle et apercu de tous les ecrans : [docs/presentation.png](docs/presentation.png) (version web : `docs/presentation.html`)
 
 Une version en ligne du jeu du Pendu, jouable a plusieurs (jusqu'a 6 joueurs) depuis n'importe quel navigateur — PC, tablette ou telephone — avec comptes utilisateurs, chat en temps reel, et deux modes de jeu.
 
@@ -58,7 +62,13 @@ pendu_multijoueur/
 ├── .python-version          # Version de Python utilisee par Render
 ├── .env.example
 ├── .gitignore
+├── docs/
+│   ├── presentation.html     # Charte graphique + parcours du joueur en images
+│   ├── presentation.png      # La meme planche en une seule image
+│   └── captures/             # Captures d'ecran du jeu
 └── static/
+    ├── logo.svg              # Icone du jeu (aussi utilisee comme favicon)
+    ├── logo-horizontal.svg   # Logo complet (icone + nom)
     ├── index.html            # Interface (auth, salle, jeu, historique, ecrans de fin)
     ├── app.js                 # Logique client (WebSocket, minuteurs, classements, reconnexion)
     └── style.css

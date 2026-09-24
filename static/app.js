@@ -16,7 +16,88 @@ const REGEX_IDENTIFIANT = /^[A-Za-z0-9_]{3,20}$/;
 function afficherEcran(id) {
   document.querySelectorAll(".ecran-simple, .app").forEach(e => e.classList.add("cache"));
   document.getElementById(id).classList.remove("cache");
+  // Le fond anime decore les ecrans d'accueil, mais ne doit pas distraire pendant une partie
+  document.getElementById("fond-anime").classList.toggle("cache", id === "ecran-jeu");
 }
+
+/* ---------- Fond anime et mini-pendu de demonstration (ecran d'accueil) ---------- */
+
+const ANIMATIONS_REDUITES = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+(function construireFondAnime() {
+  const fond = document.getElementById("fond-anime");
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  for (let i = 0; i < 26; i++) {
+    const tuile = document.createElement("span");
+    // Quelques tuiles vertes (bonnes lettres), rouges (erreurs) et des "?" pour l'imposteur
+    tuile.className = "tuile-fond" + (i % 7 === 0 ? " ok" : i % 11 === 5 ? " ko" : "");
+    tuile.textContent = i % 9 === 4 ? "?" : alphabet[Math.floor(Math.random() * alphabet.length)];
+    const taille = 28 + Math.random() * 34;
+    tuile.style.cssText = [
+      `left:${(Math.random() * 96).toFixed(1)}%`,
+      `width:${taille.toFixed(0)}px`,
+      `height:${taille.toFixed(0)}px`,
+      `font-size:${(taille * 0.45).toFixed(0)}px`,
+      `animation-duration:${(16 + Math.random() * 18).toFixed(1)}s`,
+      `animation-delay:${(-Math.random() * 34).toFixed(1)}s`,
+      `--rotation:${(Math.random() * 60 - 30).toFixed(0)}deg`,
+      `--opacite:${(0.12 + Math.random() * 0.22).toFixed(2)}`,
+      `--haut:${(Math.random() * 92).toFixed(1)}%`,
+    ].join(";");
+    fond.appendChild(tuile);
+  }
+})();
+
+const MOTS_DEMO = ["imposteur", "espion", "mystere", "indice", "suspect"];
+
+(function lancerDemoMot() {
+  const zone = document.getElementById("demo-mot");
+  const essais = document.getElementById("demo-essais");
+  const ecranAuth = document.getElementById("ecran-auth");
+  let indexMot = 0;
+
+  const dessinerCases = (mot) => {
+    zone.innerHTML = mot.split("").map(() => `<span class="demo-case"></span>`).join("");
+    essais.innerHTML = "";
+  };
+
+  if (ANIMATIONS_REDUITES) {
+    dessinerCases(MOTS_DEMO[0]);
+    [...zone.children].forEach((c, i) => { c.textContent = MOTS_DEMO[0][i]; c.classList.add("revelee"); });
+    return;
+  }
+
+  const jouerMot = () => {
+    const mot = MOTS_DEMO[indexMot++ % MOTS_DEMO.length];
+    dessinerCases(mot);
+    const cases = [...zone.children];
+    const sequence = [...new Set(mot)].sort(() => Math.random() - 0.5);
+    // Glisse 2 mauvaises lettres au milieu, comme dans une vraie partie
+    "zxkwqjb".split("").filter(l => !mot.includes(l)).sort(() => Math.random() - 0.5).slice(0, 2)
+      .forEach(faute => sequence.splice(1 + Math.floor(Math.random() * (sequence.length - 1)), 0, faute));
+
+    let etape = 0;
+    const suivant = () => {
+      if (ecranAuth.classList.contains("cache")) { setTimeout(suivant, 1000); return; }  // en pause hors accueil
+      if (etape >= sequence.length) { setTimeout(jouerMot, 2200); return; }
+      const lettre = sequence[etape++];
+      if (mot.includes(lettre)) {
+        cases.forEach((c, i) => { if (mot[i] === lettre) { c.textContent = lettre; c.classList.add("revelee"); } });
+      } else {
+        const faute = document.createElement("span");
+        faute.className = "demo-faute";
+        faute.textContent = lettre;
+        essais.appendChild(faute);
+        zone.classList.remove("secoue");
+        void zone.offsetWidth; // relance l'animation
+        zone.classList.add("secoue");
+      }
+      setTimeout(suivant, 650);
+    };
+    setTimeout(suivant, 700);
+  };
+  jouerMot();
+})();
 
 /* ---------- Authentification ---------- */
 
@@ -509,6 +590,8 @@ function mettreAJourEtat(etat) {
     document.getElementById("message-attente-hote").innerText =
       `En attente que ${etat.hote} demarre la partie...`;
   }
+  // Pendant une manche, le panneau n'a rien a afficher : on le masque au lieu de laisser une carte vide
+  document.getElementById("carte-config").classList.toggle("cache", !enAttenteOuFinMatch);
 
   const carteRole = document.getElementById("carte-role");
   if (etat.mode === "imposteur" && etat.role) {

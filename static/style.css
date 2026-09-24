@@ -60,19 +60,135 @@ input, select {
 
 /* ECRANS SIMPLES (auth / salle) */
 .ecran-simple {
+  position: relative;
+  z-index: 1;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 24px;
 }
 
 .carte-auth {
-  background: linear-gradient(145deg, rgba(12, 28, 60, .94), rgba(4, 15, 34, .94));
+  background: linear-gradient(145deg, rgba(12, 28, 60, .86), rgba(4, 15, 34, .9));
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 30px;
   width: min(380px, 90vw);
   text-align: center;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .45), 0 0 0 1px rgba(140, 92, 255, .12);
+}
+
+/* FOND ANIME : touches du clavier qui montent lentement + halos colores */
+.fond-anime {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.fond-anime::before, .fond-anime::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(20px);
+}
+.fond-anime::before {
+  width: 560px; height: 560px; left: 8%; top: 10%;
+  background: radial-gradient(circle, rgba(124, 60, 255, .30), transparent 65%);
+  animation: deriver 18s ease-in-out infinite alternate;
+}
+.fond-anime::after {
+  width: 480px; height: 480px; right: 6%; bottom: 4%;
+  background: radial-gradient(circle, rgba(32, 217, 138, .14), transparent 65%);
+  animation: deriver 23s ease-in-out infinite alternate-reverse;
+}
+@keyframes deriver { to { transform: translate(140px, 90px) scale(1.15); } }
+
+.tuile-fond {
+  position: absolute;
+  top: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 22%;
+  background: #172743;
+  border: 1px solid rgba(140, 160, 255, .18);
+  color: #eaf0ff;
+  font-weight: 800;
+  opacity: var(--opacite);
+  animation: monter linear infinite;
+  will-change: transform;
+}
+.tuile-fond.ok { background: var(--green); color: #03170f; }
+.tuile-fond.ko { background: var(--red); color: white; }
+@keyframes monter {
+  from { transform: translateY(105vh) rotate(0deg); }
+  to { transform: translateY(-120px) rotate(var(--rotation)); }
+}
+
+/* ACCUEIL : vitrine du jeu a gauche, formulaire a droite */
+.accueil-split {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 72px;
+  width: min(1060px, 100%);
+}
+.vitrine { width: 480px; }
+.vitrine-titre { font-size: 44px; line-height: 1.1; letter-spacing: -1.5px; font-weight: 800; }
+.vitrine-titre span {
+  background: linear-gradient(90deg, #a97bff, #7c3cff 60%, #20d98a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.vitrine-texte { color: var(--muted); margin: 14px 0 28px; font-size: 16px; line-height: 1.5; }
+
+.demo-mot { display: flex; gap: 8px; min-height: 58px; }
+.demo-case {
+  width: 42px;
+  height: 54px;
+  border-bottom: 4px solid #8c5cff;
+  display: grid;
+  place-items: end center;
+  padding-bottom: 4px;
+  font: 800 30px monospace;
+  text-transform: uppercase;
+  color: transparent;
+}
+.demo-case.revelee { color: var(--text); border-color: var(--green); animation: apparaitre .35s ease-out; }
+@keyframes apparaitre { from { transform: translateY(-10px) scale(1.3); opacity: 0; } }
+.demo-mot.secoue { animation: secouer .35s; }
+@keyframes secouer { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+.demo-essais { display: flex; gap: 6px; min-height: 30px; margin-top: 12px; }
+.demo-faute {
+  width: 28px; height: 28px;
+  display: grid; place-items: center;
+  border-radius: 7px;
+  background: var(--red);
+  font-weight: 800; font-size: 13px;
+  text-transform: uppercase;
+  animation: apparaitre .3s ease-out;
+}
+
+.vitrine-atouts { list-style: none; display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.vitrine-atouts li {
+  background: rgba(8, 21, 48, .8);
+  border: 1px solid var(--border);
+  border-radius: 30px;
+  padding: 7px 14px;
+  font-size: 13px;
+}
+
+@media (max-width: 980px) {
+  .accueil-split { flex-direction: column; gap: 28px; }
+  .vitrine { width: auto; text-align: center; }
+  .vitrine-titre { font-size: 28px; }
+  .vitrine-texte, .vitrine-atouts { display: none; }
+  .demo-mot, .demo-essais { justify-content: center; }
+  .demo-case { width: 28px; height: 40px; font-size: 22px; }
 }
 
 .carte-auth h1 { font-size: 26px; margin-bottom: 4px; }
@@ -123,6 +239,22 @@ input, select {
   line-height: 1;
 }
 .bouton-oeil:hover:not(:disabled) { transform: translateY(-50%); background: rgba(124, 60, 255, .2); }
+
+.logo-auth {
+  width: 88px;
+  height: 88px;
+  display: block;
+  margin: 0 auto 10px;
+  filter: drop-shadow(0 8px 24px rgba(124, 60, 255, .45));
+  transform-origin: 50% 0;
+  animation: balancer 4.5s ease-in-out infinite;
+}
+/* Le logo se balance doucement, comme un pendule */
+@keyframes balancer {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+.logo-entete { width: 46px; height: 46px; flex: 0 0 auto; }
 
 .brand-icon { font-size: 40px; filter: drop-shadow(0 0 12px rgba(124, 60, 255, .7)); }
 
@@ -360,6 +492,8 @@ input, select {
 .hint small { color: var(--muted); }
 .hint p { font-size: 13px; margin-top: 4px; }
 
+#zone-vote { margin-top: 18px; text-align: center; }
+#zone-vote h3 { margin-bottom: 10px; }
 #boutons-vote button { background: #e67e22; margin: 4px; }
 
 /* CHAT */
@@ -554,4 +688,9 @@ input, select {
   .left-column, .right-column { flex-direction: row; flex-wrap: wrap; }
   .left-column > *, .right-column > * { flex: 1; min-width: 260px; }
   .chat-card { height: 350px; }
+}
+/* Respecte le reglage systeme "reduire les animations" (en dernier pour primer sur le reste) */
+@media (prefers-reduced-motion: reduce) {
+  .fond-anime::before, .fond-anime::after, .logo-auth { animation: none; }
+  .tuile-fond { animation: none; top: var(--haut); }
 }
